@@ -9,6 +9,8 @@
         import { gamePaused } from '@sudoku/stores/game';
 
         $: hintsAvailable = $hints > 0;
+        $: exploring = $gameStore.exploring;
+        $: deadEnd = $gameStore.deadEnd;
 
         function handleHint() {
                 if (hintsAvailable) {
@@ -18,6 +20,18 @@
 
                         gameStore.applyHint($cursor);
                 }
+        }
+
+        function handleEnterExplore() {
+                gameStore.enterExplore();
+        }
+
+        function handleCommitExplore() {
+                gameStore.commitExplore();
+        }
+
+        function handleAbandonExplore() {
+                gameStore.abandonExplore();
         }
 </script>
 
@@ -55,6 +69,33 @@
 
 </div>
 
+<!-- Explore Mode 按钮行：仅在探索模式下显示提交/放弃 -->
+{#if exploring}
+<div class="explore-bar mt-3 flex justify-center space-x-3">
+	<span class="explore-label self-center text-sm font-semibold text-yellow-600">
+		🔍 Explore Mode
+		{#if deadEnd}
+			<span class="text-red-600"> — Dead End!</span>
+		{/if}
+	</span>
+
+	<button class="btn btn-small btn-primary" on:click={handleCommitExplore} title="Commit explore result">
+		✅ Commit
+	</button>
+
+	<button class="btn btn-small" on:click={handleAbandonExplore} title="Abandon and go back">
+		❌ Abandon
+	</button>
+</div>
+{:else}
+<!-- 非探索模式下显示进入探索按钮 -->
+<div class="explore-bar mt-3 flex justify-center">
+	<button class="btn btn-small" disabled={$gamePaused} on:click={handleEnterExplore} title="Enter explore mode to try candidates">
+		🔍 Explore
+	</button>
+</div>
+{/if}
+
 
 <style>
 	.action-buttons {
@@ -73,5 +114,13 @@
 
 	.badge-primary {
 		@apply bg-primary;
+	}
+
+	.explore-bar {
+		@apply flex flex-wrap items-center;
+	}
+
+	.explore-label {
+		@apply mr-2;
 	}
 </style>
